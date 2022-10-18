@@ -1,0 +1,20 @@
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.1.0/gems/byebug-11.1.3/ext/byebug
+/Users/sena/.rbenv/versions/3.1.0/bin/ruby -I /Users/sena/.rbenv/versions/3.1.0/lib/ruby/3.1.0 -r ./siteconf20221018-7447-i34926.rb extconf.rb
+creating Makefile
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.1.0/gems/byebug-11.1.3/ext/byebug
+make DESTDIR\= clean
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.1.0/gems/byebug-11.1.3/ext/byebug
+make DESTDIR\=
+compiling breakpoint.c
+compiling byebug.c
+compiling context.c
+compiling locker.c
+compiling threads.c
+linking shared-object byebug/byebug.bundle
+ld: warning: -undefined dynamic_lookup may not work with chained fixups
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.1.0/gems/byebug-11.1.3/ext/byebug
+make DESTDIR\= install
+/usr/local/bin/ginstall -c -m 0755 byebug.bundle ./.gem.20221018-7447-x2jqtk/byebug
