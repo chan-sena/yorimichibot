@@ -31,7 +31,17 @@ class LineBotController < ApplicationController
       }
     end
 
-    def search_and_create_message()
+    def search_and_create_message(keyword)
       http_client = HTTPClient.new
+      url = 'https://transit.yahoo.co.jp/search/print?from=#{departure}&flation=&to=#{destination}'
+      # url = 'http://api.ekispert.jp/v1/json/search/course/light'
+      # query = {
+      #   'from' => from,
+      #   'to' => to,
+      #   'via' => via,
+      #   'searchType' => departure,
+      #   'contentsMode' => sp,
+      #   'appicationId'
+      # }
     end
 end
