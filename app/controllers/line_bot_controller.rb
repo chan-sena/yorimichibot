@@ -29,20 +29,12 @@ class LineBotController < ApplicationController
               type: 'text',
               text: tweet_topic
             }
-            @departure = gets.chomp
           else
             message = {
               type: 'text',
-              text: ['検索できません']
+              text: '検索できません'
             }
           end
-          # message = transfer_create_message(event.message['text'])
-          message = {
-            type: 'text',
-            # event変数の中身はmessage['text']とすることで取り出せる
-            text: event.message['text']
-          }
-          # Messaging APIで提供されている応答トークン、eventのreplyTokenキーを参照することで取得できる、第一引数に応答トークン、第二引数にmessageを渡すとメッセージの返信が行われる
           client.reply_message(event['replyToken'], message)
         end
       end
@@ -62,26 +54,32 @@ class LineBotController < ApplicationController
       }
     end
 
-    def transfer_create_message()
+    def tweet_topic
       # 外部APIへGETリクエストするためのライブラリをインスタンス化、このhttp_clientでgetメソッドを使うと指定したURLに対してGETリクエストを行いそのレスポンスを取得できる
-      http_client = HTTPClient.new
+      # http_client = HTTPClient.new
       # mechanizeのライブラリをインスタンス化してagent変数に代入
+      texts = []
       agent = Mechanize.new
       # agent変数にURLに対してgetリクエストを行い、その結果をpage変数に代入
-      #page = agent.get('https://transit.yahoo.co.jp/search/print?from=#{departure}')
-      page = agent.get('https://transit.yahoo.co.jp/search/print?from=#{departure}&flation=&to=#{destination}')
-      # page = agent.get('https://transit.yahoo.co.jp/search/result?from=%E6%B1%9F%E5%8F%A4%E7%94%B0&to=%E6%96%B0%E5%AE%BF&fromgid=&togid=&flatlon=&tlatlon=&y=2022&m=11&d=07&hh=17&m1=2&m2=0&type=1&ticket=ic&expkind=1&userpass=1&ws=3&s=0&al=1&shin=1&ex=1&hb=1&lb=1&sr=1')
-      # elements変数にpage変数で取得したページから該当のタグの文章を抽出
-      elements = page.search('#route03 .station dl dt').inner_text
-      # elements変数を表示
-      # puts elements
-      # getメソッドを使用しGETリクエストを送信
-      response = http_client.get(page, elements)
-      # GETリクエストに対するレスポンスをrespon
-      response = JSON.parse(response.body)
-      message = {
-        type: 'text',
-        text: elements
-      }
+      page = agent.get("https://togetter.com/ranking")
+      page.search('li.has_thumb').each do |text|
+        title = text.at('h3').inner_text
+        url = text.at('a.thumb')[:href]
+        texts <<
+        {
+          title: title,
+          url: 'https://togetter.com/'+ url
+        }
+      end
+      texts
+      # return results
+      # # getメソッドを使用しGETリクエストを送信
+      # response = http_client.get(page, elements)
+      # # GETリクエストに対するレスポンスをrespon
+      # response = JSON.parse(response.body)
+      # message = {
+      #   type: 'text',
+      #   text: elements
+      # }
     end
 end
