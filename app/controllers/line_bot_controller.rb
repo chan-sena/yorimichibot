@@ -27,7 +27,7 @@ class LineBotController < ApplicationController
           if event.message['text'].include?("今日のツイッタートピック")
             message = {
               type: 'text',
-              text: tweet_topic
+              text: tweet_topic.join
             }
           else
             message = {
@@ -62,14 +62,12 @@ class LineBotController < ApplicationController
       agent = Mechanize.new
       # agent変数にURLに対してgetリクエストを行い、その結果をpage変数に代入
       page = agent.get("https://togetter.com/ranking")
-      page.search('li.has_thumb').each do |text|
+      page.search('li.has_thumb').first(3).each do |text|
         title = text.at('h3').inner_text
         url = text.at('a.thumb')[:href]
         texts <<
-        {
-          title: title,
-          url: 'https://togetter.com/'+ url
-        }
+          "☆" + title + "\n"+
+          'https://togetter.com/'+ url + "\n"
       end
       texts
       # return results
