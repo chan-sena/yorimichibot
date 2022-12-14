@@ -1,5 +1,6 @@
 class LineBotController < ApplicationController
   require 'mechanize'
+  require 'google/apis/youtube_v3'
 
   # callbackアクションでのみCSRF対策を無効化
   protect_from_forgery except:[:callback]
@@ -29,24 +30,11 @@ class LineBotController < ApplicationController
               type: 'text',
               text: tweet_topic.join
             }
-          elsif event.message['text'].include?("路線検索する")
+          elsif event.message['text'].include?("急上昇動画")
             message = {
               type: 'text',
-              text: '出発駅を入力してください'
+              text: youtube_topic.join
             }
-            if event.message['text'].include?(transfer_start)
-
-              message = {
-                type: 'text',
-                text: '到着駅を入力してください'
-              }
-              if event.message['text'].include?(transfer_end)
-                message = {
-                  type: 'text',
-                  text: transfer_url
-                }
-              end
-            end
           else
             message = {
               type: 'text',
@@ -76,39 +64,32 @@ class LineBotController < ApplicationController
       # 外部APIへGETリクエストするためのライブラリをインスタンス化、このhttp_clientでgetメソッドを使うと指定したURLに対してGETリクエストを行いそのレスポンスを取得できる
       # http_client = HTTPClient.new
       # mechanizeのライブラリをインスタンス化してagent変数に代入
-      texts = []
+      tweet_texts = []
       agent = Mechanize.new
       # agent変数にURLに対してgetリクエストを行い、その結果をpage変数に代入
       page = agent.get("https://togetter.com/ranking")
       page.search('li div.inner').first(3).each do |text|
         title = text.at('h3').inner_text
         url = text.at('a')[:href]
-        texts <<
+        tweet_texts <<
           "☆" + title + "\n"+
           'https://togetter.com/'+ url + "\n"
       end
-      texts
+      tweet_texts
     end
 
-    def transfer_start(departure)
-
-    end
-
-    def transfer_end(destination)
-
-    end
-
-    def transfer_url
-      texts = []
-      agent = Mechanize.new
-      page = agent.get('https://transit.yahoo.co.jp/search/print?from=#{departure}&flation=&to=#{destination}')
-      page.search('#route03 .station dl dt').first(1).each do |text|
-        departure = '江古田'
-        destination = '新宿'
-        texts <<
-          text.inner_text
+    def youtube_topic
+      youtube = Google::Apis::YoutubeV3::YouTubeService.new
+      youtube.key = ENV["YOUTUBE_API_KEY"]
+      response = youtube.list_videos('snippet', chart: 'mostPopular', max_results: 5, region_code: 'jp')
+      youtube_texts = []
+      response.items.each do |item|
+        url = item.id
+        title = item.snippet.title
+        youtube_texts <<
+         "☆"+ title + "\n" + "\n" + "https://www.youtube.com/watch?v=" + url + "\n" + "\n"
       end
-      texts
+      youtube_texts
     end
     # return results
       # # getメソッドを使用しGETリクエストを送信
