@@ -29,6 +29,24 @@ class LineBotController < ApplicationController
               type: 'text',
               text: tweet_topic.join
             }
+          elsif event.message['text'].include?("路線検索する")
+            message = {
+              type: 'text',
+              text: '出発駅を入力してください'
+            }
+            if event.message['text'].include?(transfer_start)
+
+              message = {
+                type: 'text',
+                text: '到着駅を入力してください'
+              }
+              if event.message['text'].include?(transfer_end)
+                message = {
+                  type: 'text',
+                  text: transfer_url
+                }
+              end
+            end
           else
             message = {
               type: 'text',
@@ -62,15 +80,37 @@ class LineBotController < ApplicationController
       agent = Mechanize.new
       # agent変数にURLに対してgetリクエストを行い、その結果をpage変数に代入
       page = agent.get("https://togetter.com/ranking")
-      page.search('li.has_thumb').first(3).each do |text|
+      page.search('li div.inner').first(3).each do |text|
         title = text.at('h3').inner_text
-        url = text.at('a.thumb')[:href]
+        url = text.at('a')[:href]
         texts <<
           "☆" + title + "\n"+
           'https://togetter.com/'+ url + "\n"
       end
       texts
-      # return results
+    end
+
+    def transfer_start(departure)
+
+    end
+
+    def transfer_end(destination)
+
+    end
+
+    def transfer_url
+      texts = []
+      agent = Mechanize.new
+      page = agent.get('https://transit.yahoo.co.jp/search/print?from=#{departure}&flation=&to=#{destination}')
+      page.search('#route03 .station dl dt').first(1).each do |text|
+        departure = '江古田'
+        destination = '新宿'
+        texts <<
+          text.inner_text
+      end
+      texts
+    end
+    # return results
       # # getメソッドを使用しGETリクエストを送信
       # response = http_client.get(page, elements)
       # # GETリクエストに対するレスポンスをrespon
@@ -79,5 +119,4 @@ class LineBotController < ApplicationController
       #   type: 'text',
       #   text: elements
       # }
-    end
 end
