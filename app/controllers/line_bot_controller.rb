@@ -32,8 +32,9 @@ class LineBotController < ApplicationController
             }
           elsif event.message['text'].include?("急上昇動画")
             message = {
-              type: 'text',
-              text: youtube_topic.join
+              type: 'flex',
+              altText: 'Youtubeの検索結果です。',
+              contents: youtube_topic.join
             }
           else
             message = {
@@ -73,7 +74,7 @@ class LineBotController < ApplicationController
         url = text.at('a')[:href]
         tweet_texts <<
           "☆" + title + "\n"+
-          'https://togetter.com/'+ url + "\n"
+          'https://togetter.com/'+ url + "\n" + "\n"
       end
       tweet_texts
     end
@@ -84,12 +85,102 @@ class LineBotController < ApplicationController
       response = youtube.list_videos('snippet', chart: 'mostPopular', max_results: 5, region_code: 'jp')
       youtube_texts = []
       response.items.each do |item|
-        url = item.id
-        title = item.snippet.title
-        youtube_texts <<
-         "☆"+ title + "\n" + "\n" + "https://www.youtube.com/watch?v=" + url + "\n" + "\n"
+        @image = item.snippet.thumbnails.default.url
+        @url = item.id
+        @title = item.snippet.title
+        @description = item.snippet.description
+        @channel_title = item.snippet.channel_title
+        youtube_texts.push youtube_topic_bubble
+        # youtube_texts <<
+        {
+          type: 'carousel',
+          contents: youtube_texts
+        }
+        #  "☆"+ @title + "\n" + "\n" + "https://www.youtube.com/watch?v=" + @url + "\n" + "\n"
       end
-      youtube_texts
+    end
+
+    def youtube_topic_bubble
+      {
+        type: "bubble",
+        hero: {
+          type: "image",
+          url: @image,
+          size: "full",
+          aspectRatio: "20:13",
+          aspectMode: "cover",
+          action:{
+            type: "uri",
+            uri: "https://www.youtube.com/watch?v=" + @url.to_s
+          }
+        },
+      body:{
+        type: "box",
+        layout: "vertical",
+        contents:[
+          {
+            type: "text",
+            text: @title,
+            weight: "bold",
+            size: "xl",
+            wrap: true,
+            action:{
+              type: "uri",
+              label: "action",
+              uri: "https://www.youtube.com/watch?v=" + @url.to_s
+            }
+          },
+          {
+            type: "box",
+            layout: "vertical",
+            margin: "lg",
+            spacing: "sm",
+            contents:[
+              {
+                type: "box",
+                layout: "baseline",
+                contents:[
+                  {
+                    type: "text",
+                    text: @description.to_s,
+                    color: "#aaaaaa",
+                    wrap: true
+                  }
+                ]
+              },
+              {
+                type: "box",
+                layout: "baseline",
+                spacing: "sm",
+                contents:[
+                  {
+                    type: "text",
+                    text: "チャンネル",
+                    color: "#aaaaaa",
+                    size: "sm",
+                    flex: 2,
+                    wrap: true
+                  },
+                  {
+                    type: "text",
+                    text: @channel_title,
+                    wrap: true,
+                    color: "#666666",
+                    size: "sm",
+                    flex: 5,
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      footer:{
+        type: "box",
+        layout: "vertical",
+        contents: []
+      }
+    }
     end
     # return results
       # # getメソッドを使用しGETリクエストを送信
