@@ -34,7 +34,7 @@ class LineBotController < ApplicationController
             message = {
               type: 'flex',
               altText: 'Youtubeの検索結果です。',
-              contents: youtube_topic.join
+              contents: youtube_topic
             }
           else
             message = {
@@ -82,7 +82,7 @@ class LineBotController < ApplicationController
     def youtube_topic
       youtube = Google::Apis::YoutubeV3::YouTubeService.new
       youtube.key = ENV["YOUTUBE_API_KEY"]
-      response = youtube.list_videos('snippet', chart: 'mostPopular', max_results: 5, region_code: 'jp')
+      response = youtube.list_videos('snippet', chart: 'mostPopular', max_results: 10, region_code: 'jp')
       youtube_texts = []
       response.items.each do |item|
         @image = item.snippet.thumbnails.default.url
@@ -92,17 +92,18 @@ class LineBotController < ApplicationController
         @channel_title = item.snippet.channel_title
         youtube_texts.push youtube_topic_bubble
         # youtube_texts <<
-        {
-          type: 'carousel',
-          contents: youtube_texts
-        }
+          # youtube_texts
         #  "☆"+ @title + "\n" + "\n" + "https://www.youtube.com/watch?v=" + @url + "\n" + "\n"
       end
+      {
+        type: 'carousel',
+        contents: youtube_texts
+      }
     end
 
     def youtube_topic_bubble
       {
-        type: "bubble",
+        type: 'bubble',
         hero: {
           type: "image",
           url: @image,
@@ -111,7 +112,7 @@ class LineBotController < ApplicationController
           aspectMode: "cover",
           action:{
             type: "uri",
-            uri: "https://www.youtube.com/watch?v=" + @url.to_s
+            uri: "https://www.youtube.com/watch?v=" + @url
           }
         },
       body:{
@@ -122,12 +123,12 @@ class LineBotController < ApplicationController
             type: "text",
             text: @title,
             weight: "bold",
-            size: "xl",
+            size: "md",
             wrap: true,
             action:{
               type: "uri",
               label: "action",
-              uri: "https://www.youtube.com/watch?v=" + @url.to_s
+              uri: "https://www.youtube.com/watch?v=" + @url
             }
           },
           {
@@ -142,9 +143,9 @@ class LineBotController < ApplicationController
                 contents:[
                   {
                     type: "text",
-                    text: @description.to_s,
+                    text: @description,
                     color: "#aaaaaa",
-                    wrap: true
+                    size: 'sm'
                   }
                 ]
               },
