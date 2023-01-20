@@ -36,6 +36,23 @@ class LineBotController < ApplicationController
               altText: 'Youtubeの検索結果です。',
               contents: youtube_topic
             }
+          elsif event.message['text'].include?('最寄駅')
+            message = {
+              type: 'template',
+              altText: '現在地検索中',
+              template:{
+                type: 'buttons',
+                title: '最寄駅検索',
+                text: '現在地から一番近い駅と路線を検索することができます。',
+                actions: [
+                  {
+                    type: 'uri',
+                    label: '現在地を送信',
+                    uri: 'https://line.me/R/nv/location/'
+                  }
+                ]
+              }
+            }
           else
             message = {
               type: 'text',
@@ -43,6 +60,14 @@ class LineBotController < ApplicationController
             }
           end
           client.reply_message(event['replyToken'], message)
+          when Line::Bot::Event::MessageType::Location
+            p event['message']['latitude']
+            p event['message']['longitude']
+            # p stations(event['message']['longitude'], event['message']['latitude'])
+            stations = stations(event["message"]["longitude"], event["message"]["latitude"])
+            message = stations.map{|station|
+            "🚃#{station["name"]}駅   #{station["line"]}(#{station["distance"]})"}.join("\n")
+            client.reply_message(event['replyToken'], {type: 'text', text: "【最寄駅と最寄路線までの距離です】"+ "\n" + message})
         end
       end
     end
@@ -69,7 +94,7 @@ class LineBotController < ApplicationController
       agent = Mechanize.new
       # agent変数にURLに対してgetリクエストを行い、その結果をpage変数に代入
       page = agent.get("https://togetter.com/ranking")
-      page.search('li div.inner').first(3).each do |text|
+      page.search('li div.inner').first(10).each do |text|
         title = text.at('h3').inner_text
         url = text.at('a')[:href]
         tweet_texts <<
@@ -182,6 +207,18 @@ class LineBotController < ApplicationController
         contents: []
       }
     }
+    end
+
+
+    def stations(longitude, latitude)
+      uri = URI('http://express.heartrails.com/api/json')
+      uri.query = URI.encode_www_form({
+        method: 'getStations',
+          x: longitude,
+          y: latitude
+      })
+      res = Net::HTTP.get_response(uri)
+      JSON.parse(res.body)['response']['station']
     end
     # return results
       # # getメソッドを使用しGETリクエストを送信
