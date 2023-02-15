@@ -36,14 +36,14 @@ class LineBotController < ApplicationController
               altText: 'Youtubeの検索結果です。',
               contents: youtube_topic
             }
-          elsif event.message['text'].include?('最寄駅')
+          elsif event.message['text'].include?('現在地検索')
             message = {
               type: 'template',
               altText: '現在地検索中',
               template:{
                 type: 'buttons',
-                title: '最寄駅検索',
-                text: '現在地から一番近い駅と路線を検索することができます。',
+                title: '現在地検索',
+                text: '現在地の天気、現在地から一番近い駅と路線を検索します。',
                 actions: [
                   {
                     type: 'uri',
@@ -53,6 +53,8 @@ class LineBotController < ApplicationController
                 ]
               }
             }
+          elsif event.message['text'].include?('駅')
+            message ={}
           else
             message = {
               type: 'text',
@@ -61,13 +63,16 @@ class LineBotController < ApplicationController
           end
           client.reply_message(event['replyToken'], message)
           when Line::Bot::Event::MessageType::Location
-            p event['message']['latitude']
-            p event['message']['longitude']
+            # p event['message']['latitude']
+            # p event['message']['longitude']
             # p stations(event['message']['longitude'], event['message']['latitude'])
             stations = stations(event["message"]["longitude"], event["message"]["latitude"])
-            message = stations.map{|station|
+            station_message = stations.map{|station|
             "🚃#{station["name"]}駅   #{station["line"]}(#{station["distance"]})"}.join("\n")
-            client.reply_message(event['replyToken'], {type: 'text', text: "【最寄駅と最寄路線までの距離です】"+ "\n" + message})
+            client.reply_message(event['replyToken'],
+              {type: 'text',
+               text: "【最寄駅と最寄路線までの距離です】"+ "\n" + station_message + "\n" + "\n" + "最寄駅周辺の寄り道スポットを調べる場合はメッセージ送信欄に【" + stations.map{|station|"#{station["name"]}"}.first + "駅】と入力してください。"
+               })
         end
       end
     end
