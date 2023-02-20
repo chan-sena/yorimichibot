@@ -1,6 +1,7 @@
 class LineBotController < ApplicationController
   require 'mechanize'
   require 'google/apis/youtube_v3'
+  require 'httparty'
 
   # callbackアクションでのみCSRF対策を無効化
   protect_from_forgery except:[:callback]
@@ -28,7 +29,7 @@ class LineBotController < ApplicationController
           if event.message['text'].include?("今日のツイッタートピック")
             message = {
               type: 'text',
-              text: tweet_topic.join
+              text: "☆今話題になっているトピック☆" + "\n" + "\n" + tweet_topic.join
             }
           elsif event.message['text'].include?("急上昇動画")
             message = {
@@ -42,8 +43,8 @@ class LineBotController < ApplicationController
               altText: '現在地検索中',
               template:{
                 type: 'buttons',
-                title: '現在地検索',
-                text: '現在地の天気、現在地から一番近い駅と路線を検索します。',
+                title: '最寄駅を検索🔍',
+                text: '現在地から一番近い最寄駅と最寄駅近くのグルメスポットを検索します',
                 actions: [
                   {
                     type: 'uri',
@@ -54,11 +55,15 @@ class LineBotController < ApplicationController
               }
             }
           elsif event.message['text'].include?('駅')
-            message ={}
+            message ={
+              type: 'flex',
+              altText: '寄り道スポットの検索結果です',
+              contents: spot_search
+            }
           else
             message = {
               type: 'text',
-              text: '検索できません'
+              text: 'こちらは自動応答BOTになるため個別での応答をすることはできません。当BOTに関するバグ報告やご要望などは【お問い合わせ】よりご連絡くださいませ。'
             }
           end
           client.reply_message(event['replyToken'], message)
@@ -71,7 +76,7 @@ class LineBotController < ApplicationController
             "🚃#{station["name"]}駅   #{station["line"]}(#{station["distance"]})"}.join("\n")
             client.reply_message(event['replyToken'],
               {type: 'text',
-               text: "【最寄駅と最寄路線までの距離です】"+ "\n" + station_message + "\n" + "\n" + "最寄駅周辺の寄り道スポットを調べる場合はメッセージ送信欄に【" + stations.map{|station|"#{station["name"]}"}.first + "駅】と入力してください。"
+               text: "【最寄駅と最寄路線までの距離です】"+ "\n" + station_message + "\n" + "\n" + "最寄駅周辺の寄り道グルメスポットを調べる場合はメッセージ送信欄に【" + stations.map{|station|"#{station["name"]}"}.first + "駅】のように調べたい駅名を入力してください。"
                })
         end
       end
@@ -99,11 +104,11 @@ class LineBotController < ApplicationController
       agent = Mechanize.new
       # agent変数にURLに対してgetリクエストを行い、その結果をpage変数に代入
       page = agent.get("https://togetter.com/ranking")
-      page.search('li div.inner').first(10).each do |text|
+      page.search('li div.inner').first(10).each_with_index do |text, index|
         title = text.at('h3').inner_text
         url = text.at('a')[:href]
         tweet_texts <<
-          "☆" + title + "\n"+
+          "【#{index+1}】" + title + "\n"+
           'https://togetter.com/'+ url + "\n" + "\n"
       end
       tweet_texts
@@ -224,6 +229,33 @@ class LineBotController < ApplicationController
       })
       res = Net::HTTP.get_response(uri)
       JSON.parse(res.body)['response']['station']
+    end
+
+    def search_restaurants(keyword)
+      base_uri = 'http://webservice.recruit.co.jp/hotpepper/small_area/v1/'
+      hotpepper_key = ENV['HOTPEPPER_API']
+      response = HTTParty.get(base_uri, {
+        query: {
+          key: hotpepper_key,
+          keyword: keyword,
+        }
+      })
+
+      if response.success?
+        area_code = response.parsed_response.dig('results', 'small_area', 0, 'large_area', 'code')
+        if area_code.present?
+          response = HTTParty.get('http://webservice.recruit.co.jp/hotpepper/gourmet/v1/', {
+            query: {
+              key: hotpepper_key,
+              keyword: keyword,
+              large_area: area_code
+            }
+          })
+          if response.success?
+            return response.parsed_response
+          end
+        end
+      end
     end
     # return results
       # # getメソッドを使用しGETリクエストを送信
