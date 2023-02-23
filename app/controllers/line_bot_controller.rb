@@ -1,7 +1,6 @@
 class LineBotController < ApplicationController
   require 'mechanize'
   require 'google/apis/youtube_v3'
-  require 'httparty'
 
   # callbackアクションでのみCSRF対策を無効化
   protect_from_forgery except:[:callback]
@@ -55,10 +54,16 @@ class LineBotController < ApplicationController
               }
             }
           elsif event.message['text'].include?('駅')
+            text = event.message['text']
+            results = search_restaurants(text)
+            if results.present?
+              reply_text = results.map{|result| "#{result['name']}は#{result['genre']['name']}のお店です。" + "\n" + "住所は#{result['address']}です。"}.join("\n")
+            else
+              reply_text = "「#{text}」に該当するお店は見つかりませんでした。"
+            end
             message ={
-              type: 'flex',
-              altText: '寄り道スポットの検索結果です',
-              contents: spot_search
+              type: 'text',
+              text: 'よりみちできるグルメスポットの検索結果です！' + "\n" + "\n" +  reply_text + "\n" + "\n" + 'Powered by ホットペッパー Webサービス'
             }
           else
             message = {
@@ -232,30 +237,15 @@ class LineBotController < ApplicationController
     end
 
     def search_restaurants(keyword)
-      base_uri = 'http://webservice.recruit.co.jp/hotpepper/small_area/v1/'
-      hotpepper_key = ENV['HOTPEPPER_API']
-      response = HTTParty.get(base_uri, {
-        query: {
-          key: hotpepper_key,
-          keyword: keyword,
-        }
+      uri = URI('http://webservice.recruit.co.jp/hotpepper/gourmet/v1/')
+      uri.query = URI.encode_www_form({
+        key: ENV["HOTPEPPER_API"],
+        keyword: keyword,
+        range: 2,
+        format: 'json'
       })
-
-      if response.success?
-        area_code = response.parsed_response.dig('results', 'small_area', 0, 'large_area', 'code')
-        if area_code.present?
-          response = HTTParty.get('http://webservice.recruit.co.jp/hotpepper/gourmet/v1/', {
-            query: {
-              key: hotpepper_key,
-              keyword: keyword,
-              large_area: area_code
-            }
-          })
-          if response.success?
-            return response.parsed_response
-          end
-        end
-      end
+      res = Net::HTTP.get_response(uri)
+      JSON.parse(res.body)['results']['shop']
     end
     # return results
       # # getメソッドを使用しGETリクエストを送信
