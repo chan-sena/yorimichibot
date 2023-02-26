@@ -62,4 +62,4 @@ gem 'dotenv-rails'
 gem 'httpclient'
 gem 'mechanize'
 gem 'google-apis-youtube_v3'
-
+gem 'rubocop'
