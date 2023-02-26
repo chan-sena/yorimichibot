@@ -1,7 +1,7 @@
 class TransferScrapingController < ApplicationController
-#require 'open-uri'
-#require 'nokogiri'
-require 'mechanize'
+  # require 'open-uri'
+  # require 'nokogiri'
+  require 'mechanize'
 
   class Scraping
     def self.linebot
@@ -13,17 +13,16 @@ require 'mechanize'
     end
   end
 
-
   def transfer_url
-      texts = []
-      agent = Mechanize.new
-      page = agent.get('https://transit.yahoo.co.jp/search/print?from=#{departure}&flation=&to=#{destination}')
-      page.search('#route03 .station dl dt').first(1).each do |text|
-        departure = '江古田'
-        destination = '新宿'
-        texts <<
-          text.inner_text
-      end
-      texts
+    texts = []
+    agent = Mechanize.new
+    page = agent.get('https://transit.yahoo.co.jp/search/print?from=#{departure}&flation=&to=#{destination}')
+    page.search('#route03 .station dl dt').first(1).each do |text|
+      departure = '江古田'
+      destination = '新宿'
+      texts <<
+        text.inner_text
     end
+    texts
+  end
 end

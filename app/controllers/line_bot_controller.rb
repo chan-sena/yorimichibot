@@ -3,7 +3,7 @@ class LineBotController < ApplicationController
   require 'google/apis/youtube_v3'
 
   # callbackアクションでのみCSRF対策を無効化
-  protect_from_forgery except:[:callback]
+  protect_from_forgery except: [:callback]
   def callback
     # StringIOクラスのreadメソッドを用いて文字列としてリクエストのメッセージボディだけを参照し、body変数に代入する
     body = request.body.read
@@ -16,6 +16,7 @@ class LineBotController < ApplicationController
       # headメソッドはステータスコードを返したい時に使用、失敗の400を返す
       return head :bad_request
     end
+
     # parse_events_fromメソッドに文字列のメッセージボディを渡すと要素を配列で取得できる
     events = client.parse_events_from(body)
     events.each do |event|
@@ -25,12 +26,12 @@ class LineBotController < ApplicationController
         # eventのtypeキーの値がLine::Bot::Event::MessageType::Text、つまりtextであるかどうか確認
         case event.type
         when Line::Bot::Event::MessageType::Text
-          if event.message['text'].include?("今日のツイッタートピック")
+          if event.message['text'].include?('今日のツイッタートピック')
             message = {
               type: 'text',
-              text: "☆今話題になっているトピック☆" + "\n" + "\n" + tweet_topic.join
+              text: '☆今話題になっているトピック☆' + "\n" + "\n" + tweet_topic.join
             }
-          elsif event.message['text'].include?("急上昇動画")
+          elsif event.message['text'].include?('急上昇動画')
             message = {
               type: 'flex',
               altText: 'Youtubeの検索結果です。',
@@ -40,7 +41,7 @@ class LineBotController < ApplicationController
             message = {
               type: 'template',
               altText: '現在地検索中',
-              template:{
+              template: {
                 type: 'buttons',
                 title: '最寄駅を検索🔍',
                 text: '現在地から一番近い最寄駅と最寄駅近くのグルメスポットを検索します',
@@ -81,17 +82,19 @@ class LineBotController < ApplicationController
             }
           end
           client.reply_message(event['replyToken'], message)
-          when Line::Bot::Event::MessageType::Location
-            # p event['message']['latitude']
-            # p event['message']['longitude']
-            # p stations(event['message']['longitude'], event['message']['latitude'])
-            stations = stations(event["message"]["longitude"], event["message"]["latitude"])
-            station_message = stations.map{|station|
-            "🚃#{station["name"]}駅   #{station["line"]}(#{station["distance"]})"}.join("\n")
-            client.reply_message(event['replyToken'],
-              {type: 'text',
-               text: "【最寄駅と最寄路線までの距離です】"+ "\n" + station_message + "\n" + "\n" + "最寄駅周辺の寄り道グルメスポットを調べる場合はメッセージ送信欄に【" + stations.map{|station|"#{station["name"]}"}.first + "駅】のように調べたい駅名を入力してください。"
-               })
+        when Line::Bot::Event::MessageType::Location
+          # p event['message']['latitude']
+          # p event['message']['longitude']
+          # p stations(event['message']['longitude'], event['message']['latitude'])
+          stations = stations(event['message']['longitude'], event['message']['latitude'])
+          station_message = stations.map do |station|
+            "🚃#{station['name']}駅   #{station['line']}(#{station['distance']})"
+          end.join("\n")
+          client.reply_message(event['replyToken'],
+                               { type: 'text',
+                                 text: '【最寄駅と最寄路線までの距離です】' + "\n" + station_message + "\n" + "\n" + '最寄駅周辺の寄り道グルメスポットを調べる場合はメッセージ送信欄に【' + stations.map do |station|
+                                                                                                                                            "#{station['name']}"
+                                                                                                                                          end.first + '駅】のように調べたい駅名を入力してください。' })
         end
       end
     end
@@ -100,124 +103,125 @@ class LineBotController < ApplicationController
   end
 
   private
-    # Line::Bot::Clientクラスのインスタンス化
-    def client
-      # ||=は左辺がnillやfalseの場合、右辺を代入する
-      # callbackアクションからclientメソッドを呼び出すことでLINE Messaging API SDKの機能を使うことができる
-      @client ||= Line::Bot::Client.new { |config|
-        config.channel_secret = ENV["LINE_CHANNEL_SECRET"]
-        config.channel_token = ENV["LINE_CHANNEL_TOKEN"]
-      }
-    end
 
-    def tweet_topic
-      # 外部APIへGETリクエストするためのライブラリをインスタンス化、このhttp_clientでgetメソッドを使うと指定したURLに対してGETリクエストを行いそのレスポンスを取得できる
-      # http_client = HTTPClient.new
-      # mechanizeのライブラリをインスタンス化してagent変数に代入
-      tweet_texts = []
-      agent = Mechanize.new
-      # agent変数にURLに対してgetリクエストを行い、その結果をpage変数に代入
-      page = agent.get("https://togetter.com/ranking")
-      page.search('li div.inner').first(10).each_with_index do |text, index|
-        title = text.at('h3').inner_text
-        url = text.at('a')[:href]
-        tweet_texts <<
-          "【#{index+1}】" + title + "\n"+
-          'https://togetter.com/'+ url + "\n" + "\n"
-      end
-      tweet_texts
+  # Line::Bot::Clientクラスのインスタンス化
+  def client
+    # ||=は左辺がnillやfalseの場合、右辺を代入する
+    # callbackアクションからclientメソッドを呼び出すことでLINE Messaging API SDKの機能を使うことができる
+    @client ||= Line::Bot::Client.new do |config|
+      config.channel_secret = ENV['LINE_CHANNEL_SECRET']
+      config.channel_token = ENV['LINE_CHANNEL_TOKEN']
     end
+  end
 
-    def youtube_topic
-      youtube = Google::Apis::YoutubeV3::YouTubeService.new
-      youtube.key = ENV["YOUTUBE_API_KEY"]
-      response = youtube.list_videos('snippet', chart: 'mostPopular', max_results: 10, region_code: 'jp')
-      youtube_texts = []
-      response.items.each do |item|
-        @image = item.snippet.thumbnails.default.url
-        @url = item.id
-        @title = item.snippet.title
-        @description = item.snippet.description
-        @channel_title = item.snippet.channel_title
-        youtube_texts.push youtube_topic_bubble
-        # youtube_texts <<
-          # youtube_texts
-        #  "☆"+ @title + "\n" + "\n" + "https://www.youtube.com/watch?v=" + @url + "\n" + "\n"
-      end
-      {
-        type: 'carousel',
-        contents: youtube_texts
-      }
+  def tweet_topic
+    # 外部APIへGETリクエストするためのライブラリをインスタンス化、このhttp_clientでgetメソッドを使うと指定したURLに対してGETリクエストを行いそのレスポンスを取得できる
+    # http_client = HTTPClient.new
+    # mechanizeのライブラリをインスタンス化してagent変数に代入
+    tweet_texts = []
+    agent = Mechanize.new
+    # agent変数にURLに対してgetリクエストを行い、その結果をpage変数に代入
+    page = agent.get('https://togetter.com/ranking')
+    page.search('li div.inner').first(10).each_with_index do |text, index|
+      title = text.at('h3').inner_text
+      url = text.at('a')[:href]
+      tweet_texts <<
+        "【#{index + 1}】" + title + "\n" +
+        'https://togetter.com/' + url + "\n" + "\n"
     end
+    tweet_texts
+  end
 
-    def youtube_topic_bubble
-      {
-        type: 'bubble',
-        hero: {
-          type: "image",
-          url: @image,
-          size: "full",
-          aspectRatio: "20:13",
-          aspectMode: "cover",
-          action:{
-            type: "uri",
-            uri: "https://www.youtube.com/watch?v=" + @url
-          }
-        },
-      body:{
-        type: "box",
-        layout: "vertical",
-        contents:[
+  def youtube_topic
+    youtube = Google::Apis::YoutubeV3::YouTubeService.new
+    youtube.key = ENV['YOUTUBE_API_KEY']
+    response = youtube.list_videos('snippet', chart: 'mostPopular', max_results: 10, region_code: 'jp')
+    youtube_texts = []
+    response.items.each do |item|
+      @image = item.snippet.thumbnails.default.url
+      @url = item.id
+      @title = item.snippet.title
+      @description = item.snippet.description
+      @channel_title = item.snippet.channel_title
+      youtube_texts.push youtube_topic_bubble
+      # youtube_texts <<
+      # youtube_texts
+      #  "☆"+ @title + "\n" + "\n" + "https://www.youtube.com/watch?v=" + @url + "\n" + "\n"
+    end
+    {
+      type: 'carousel',
+      contents: youtube_texts
+    }
+  end
+
+  def youtube_topic_bubble
+    {
+      type: 'bubble',
+      hero: {
+        type: 'image',
+        url: @image,
+        size: 'full',
+        aspectRatio: '20:13',
+        aspectMode: 'cover',
+        action: {
+          type: 'uri',
+          uri: 'https://www.youtube.com/watch?v=' + @url
+        }
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        contents: [
           {
-            type: "text",
+            type: 'text',
             text: @title,
-            weight: "bold",
-            size: "md",
+            weight: 'bold',
+            size: 'md',
             wrap: true,
-            action:{
-              type: "uri",
-              label: "action",
-              uri: "https://www.youtube.com/watch?v=" + @url
+            action: {
+              type: 'uri',
+              label: 'action',
+              uri: 'https://www.youtube.com/watch?v=' + @url
             }
           },
           {
-            type: "box",
-            layout: "vertical",
-            margin: "lg",
-            spacing: "sm",
-            contents:[
+            type: 'box',
+            layout: 'vertical',
+            margin: 'lg',
+            spacing: 'sm',
+            contents: [
               {
-                type: "box",
-                layout: "baseline",
-                contents:[
+                type: 'box',
+                layout: 'baseline',
+                contents: [
                   {
-                    type: "text",
+                    type: 'text',
                     text: @description,
-                    color: "#aaaaaa",
+                    color: '#aaaaaa',
                     size: 'sm'
                   }
                 ]
               },
               {
-                type: "box",
-                layout: "baseline",
-                spacing: "sm",
-                contents:[
+                type: 'box',
+                layout: 'baseline',
+                spacing: 'sm',
+                contents: [
                   {
-                    type: "text",
-                    text: "チャンネル",
-                    color: "#aaaaaa",
-                    size: "sm",
+                    type: 'text',
+                    text: 'チャンネル',
+                    color: '#aaaaaa',
+                    size: 'sm',
                     flex: 2,
                     wrap: true
                   },
                   {
-                    type: "text",
+                    type: 'text',
                     text: @channel_title,
                     wrap: true,
-                    color: "#666666",
-                    size: "sm",
-                    flex: 5,
+                    color: '#666666',
+                    size: 'sm',
+                    flex: 5
                   }
                 ]
               }
@@ -225,212 +229,210 @@ class LineBotController < ApplicationController
           }
         ]
       },
-      footer:{
-        type: "box",
-        layout: "vertical",
+      footer: {
+        type: 'box',
+        layout: 'vertical',
         contents: []
       }
     }
-    end
+  end
 
+  def stations(longitude, latitude)
+    uri = URI('http://express.heartrails.com/api/json')
+    uri.query = URI.encode_www_form({
+                                      method: 'getStations',
+                                      x: longitude,
+                                      y: latitude
+                                    })
+    res = Net::HTTP.get_response(uri)
+    JSON.parse(res.body)['response']['station']
+  end
 
-    def stations(longitude, latitude)
-      uri = URI('http://express.heartrails.com/api/json')
-      uri.query = URI.encode_www_form({
-        method: 'getStations',
-          x: longitude,
-          y: latitude
-      })
-      res = Net::HTTP.get_response(uri)
-      JSON.parse(res.body)['response']['station']
-    end
+  def search_restaurants(keyword)
+    uri = URI('http://webservice.recruit.co.jp/hotpepper/gourmet/v1/')
+    uri.query = URI.encode_www_form({
+                                      key: ENV['HOTPEPPER_API'],
+                                      keyword:,
+                                      range: 2,
+                                      format: 'json'
+                                    })
+    res = Net::HTTP.get_response(uri)
+    JSON.parse(res.body)['results']['shop']
+  end
 
-    def search_restaurants(keyword)
-      uri = URI('http://webservice.recruit.co.jp/hotpepper/gourmet/v1/')
-      uri.query = URI.encode_www_form({
-        key: ENV["HOTPEPPER_API"],
-        keyword: keyword,
-        range: 2,
-        format: 'json'
-      })
-      res = Net::HTTP.get_response(uri)
-      JSON.parse(res.body)['results']['shop']
-    end
-
-
-    def restaurants_bubble(shops)
-      bubbles = []
-      shops.map do |shop|
+  def restaurants_bubble(shops)
+    bubbles = []
+    shops.map do |shop|
       bubble =
-      {
-        type: "bubble",
-        hero: {
-          type: "image",
-          url: "#{shop['photo']['mobile']['l']}",
-          size: "full",
-          aspectRatio: "20:13",
-          aspectMode: "cover",
-          action: {
-            type: "uri",
-            uri: shop['urls']['pc']
-          }
-        },
-        body: {
-          type: "box",
-          layout: "vertical",
-          contents: [
-            {
-              type: "text",
-              text: shop['name'],
-              weight: "bold",
-              size: "xl",
-              wrap: true
-            },
-            {
-              type: "box",
-              layout: "vertical",
-              margin: "lg",
-              spacing: "sm",
-              contents: [
-               {
-                  type: "box",
-                  layout: "baseline",
-                  contents: [
-                    {
-                      type: "text",
-                      text: "カテゴリ",
-                      flex: 1,
-                      size: "sm",
-                      color: "#aaaaaa",
-                      wrap: true
-                    },
-                    {
-                     type: "text",
-                     text: shop['genre']['name'],
-                     flex: 3,
-                     size: "sm",
-                     color: "#666666"
-                    }
-                  ]
-               },
-               {
-                  type: "box",
-                  layout: "baseline",
-                  spacing: "sm",
-                  contents: [
-                    {
-                      type: "text",
-                      text: "住所",
-                      color: "#aaaaaa",
-                      size: "sm",
-                      flex: 1
-                    },
-                    {
-                      type: "text",
-                      wrap: true,
-                      color: "#666666",
-                      size: "sm",
-                      flex: 5,
-                      text: shop['address']
-                    }
-                  ]
-                },
-                {
-                  type: "box",
-                  layout: "baseline",
-                  spacing: "sm",
-                  contents: [
-                    {
-                      type: "text",
-                      text: "営業日時",
-                      color: "#aaaaaa",
-                      size: "sm",
-                      flex: 1
-                    },
-                    {
-                      type: "text",
-                      color: "#666666",
-                      size: "sm",
-                      flex: 3,
-                      text: shop['open']
-                    }
-                  ]
-                },
-                {
-                  type: "box",
-                  layout: "baseline",
-                  contents: [
-                    {
-                      type: "text",
-                      text: "休日",
-                      flex: 1,
-                      color: "#aaaaaa",
-                      size: "sm"
-                    },
-                    {
-                      type: "text",
-                      text: shop['close'],
-                      flex: 3,
-                      size: "sm",
-                      color: "#666666"
-                    }
-                  ]
-                },
-                {
-                  type: "box",
-                  layout: "baseline",
-                  contents: [
-                    {
-                      type: "text",
-                      action: {
-                        type: "uri",
-                        label: "action",
-                        uri: "http://webservice.recruit.co.jp/"
+        {
+          type: 'bubble',
+          hero: {
+            type: 'image',
+            url: "#{shop['photo']['mobile']['l']}",
+            size: 'full',
+            aspectRatio: '20:13',
+            aspectMode: 'cover',
+            action: {
+              type: 'uri',
+              uri: shop['urls']['pc']
+            }
+          },
+          body: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [
+              {
+                type: 'text',
+                text: shop['name'],
+                weight: 'bold',
+                size: 'xl',
+                wrap: true
+              },
+              {
+                type: 'box',
+                layout: 'vertical',
+                margin: 'lg',
+                spacing: 'sm',
+                contents: [
+                  {
+                    type: 'box',
+                    layout: 'baseline',
+                    contents: [
+                      {
+                        type: 'text',
+                        text: 'カテゴリ',
+                        flex: 1,
+                        size: 'sm',
+                        color: '#aaaaaa',
+                        wrap: true
                       },
-                      text: "Powered by ホットペッパー Webサービス",
-                      wrap: true,
-                      size: "xs",
-                      color: "#aaaaaa"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        footer: {
-          type: "box",
-          layout: "vertical",
-          spacing: "sm",
-          contents: [
-            {
-              type: "button",
-              style: "link",
-              height: "sm",
-              action: {
-                type: "uri",
-                label: "詳細はこちら",
-                uri: shop['urls']['pc']
+                      {
+                        type: 'text',
+                        text: shop['genre']['name'],
+                        flex: 3,
+                        size: 'sm',
+                        color: '#666666'
+                      }
+                    ]
+                  },
+                  {
+                    type: 'box',
+                    layout: 'baseline',
+                    spacing: 'sm',
+                    contents: [
+                      {
+                        type: 'text',
+                        text: '住所',
+                        color: '#aaaaaa',
+                        size: 'sm',
+                        flex: 1
+                      },
+                      {
+                        type: 'text',
+                        wrap: true,
+                        color: '#666666',
+                        size: 'sm',
+                        flex: 5,
+                        text: shop['address']
+                      }
+                    ]
+                  },
+                  {
+                    type: 'box',
+                    layout: 'baseline',
+                    spacing: 'sm',
+                    contents: [
+                      {
+                        type: 'text',
+                        text: '営業日時',
+                        color: '#aaaaaa',
+                        size: 'sm',
+                        flex: 1
+                      },
+                      {
+                        type: 'text',
+                        color: '#666666',
+                        size: 'sm',
+                        flex: 3,
+                        text: shop['open']
+                      }
+                    ]
+                  },
+                  {
+                    type: 'box',
+                    layout: 'baseline',
+                    contents: [
+                      {
+                        type: 'text',
+                        text: '休日',
+                        flex: 1,
+                        color: '#aaaaaa',
+                        size: 'sm'
+                      },
+                      {
+                        type: 'text',
+                        text: shop['close'],
+                        flex: 3,
+                        size: 'sm',
+                        color: '#666666'
+                      }
+                    ]
+                  },
+                  {
+                    type: 'box',
+                    layout: 'baseline',
+                    contents: [
+                      {
+                        type: 'text',
+                        action: {
+                          type: 'uri',
+                          label: 'action',
+                          uri: 'http://webservice.recruit.co.jp/'
+                        },
+                        text: 'Powered by ホットペッパー Webサービス',
+                        wrap: true,
+                        size: 'xs',
+                        color: '#aaaaaa'
+                      }
+                    ]
+                  }
+                ]
               }
-            }
-          ],
-          flex: 0
-         }
-      }
+            ]
+          },
+          footer: {
+            type: 'box',
+            layout: 'vertical',
+            spacing: 'sm',
+            contents: [
+              {
+                type: 'button',
+                style: 'link',
+                height: 'sm',
+                action: {
+                  type: 'uri',
+                  label: '詳細はこちら',
+                  uri: shop['urls']['pc']
+                }
+              }
+            ],
+            flex: 0
+          }
+        }
       bubbles.push bubble
     end
-      {
-        type: 'carousel',
-        contents: bubbles
-      }
-    end
-    # return results
-      # # getメソッドを使用しGETリクエストを送信
-      # response = http_client.get(page, elements)
-      # # GETリクエストに対するレスポンスをrespon
-      # response = JSON.parse(response.body)
-      # message = {
-      #   type: 'text',
-      #   text: elements
-      # }
+    {
+      type: 'carousel',
+      contents: bubbles
+    }
+  end
+  # return results
+  # # getメソッドを使用しGETリクエストを送信
+  # response = http_client.get(page, elements)
+  # # GETリクエストに対するレスポンスをrespon
+  # response = JSON.parse(response.body)
+  # message = {
+  #   type: 'text',
+  #   text: elements
+  # }
 end
