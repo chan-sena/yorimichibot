@@ -1,6 +1,7 @@
 class LineBotController < ApplicationController
   require 'mechanize'
   require 'google/apis/youtube_v3'
+  require 'net/http'
 
   # callbackアクションでのみCSRF対策を無効化
   protect_from_forgery except: [:callback]
@@ -44,7 +45,7 @@ class LineBotController < ApplicationController
               template: {
                 type: 'buttons',
                 title: '最寄駅を検索🔍',
-                text: '現在地から一番近い最寄駅と最寄駅近くのグルメスポットを検索します',
+                text: '現在地から一番近い最寄駅と最寄駅近くのカフェスポットを検索します',
                 actions: [
                   {
                     type: 'uri',
@@ -60,7 +61,7 @@ class LineBotController < ApplicationController
             if results.present?
               message = {
                 type: 'flex',
-                altText: 'よりみちできるグルメスポットの検索結果です！',
+                altText: 'よりみちできるカフェスポットの検索結果です！',
                 contents: restaurants_bubble(results)
               }
               # reply_text = results.map{|result| "☆#{result['name']}"+ "\n" + "ジャンル：#{result['genre']['name']}" + "\n" + "住所：#{result['address']}"+ "\n" + "営業日時：#{result['open']}"+ "\n" + "休日：#{result['close']}"+ "\n" + "URL：#{result['urls']['pc']}"}.join("\n")
@@ -92,9 +93,9 @@ class LineBotController < ApplicationController
           end.join("\n")
           client.reply_message(event['replyToken'],
                                { type: 'text',
-                                 text: '【最寄駅と最寄路線までの距離です】' + "\n" + station_message + "\n" + "\n" + '最寄駅周辺の寄り道グルメスポットを調べる場合はメッセージ送信欄に【' + stations.map do |station|
+                                 text: '【最寄駅と最寄路線までの距離です】' + "\n" + station_message + "\n" + "\n" + '最寄駅周辺のよりみちできるカフェスポットを調べる場合はメッセージ送信欄に【' + stations.map do |station|
                                                                                                                                             "#{station['name']}"
-                                                                                                                                          end.first + '駅】のように調べたい駅名を入力してください。' })
+                                                                                                                                          end.first + '駅】のように調べたい駅名を入力してください。※駅まで含めて入力ください。' })
         end
       end
     end
@@ -249,16 +250,21 @@ class LineBotController < ApplicationController
   end
 
   def search_restaurants(keyword)
+    keyword_without_station = keyword.gsub('駅', '')
     uri = URI('http://webservice.recruit.co.jp/hotpepper/gourmet/v1/')
     uri.query = URI.encode_www_form({
                                       key: ENV['HOTPEPPER_API'],
-                                      keyword:,
+                                      keyword: keyword_without_station,
+                                      genre: 'G014',
                                       range: 2,
+                                      count: 12,
+                                      order: 4,
                                       format: 'json'
                                     })
     res = Net::HTTP.get_response(uri)
     JSON.parse(res.body)['results']['shop']
   end
+
 
   def restaurants_bubble(shops)
     bubbles = []
@@ -268,7 +274,7 @@ class LineBotController < ApplicationController
           type: 'bubble',
           hero: {
             type: 'image',
-            url: "#{shop['photo']['mobile']['l']}",
+            url: shop['photo']['mobile']['l'],
             size: 'full',
             aspectRatio: '20:13',
             aspectMode: 'cover',
