@@ -1,7 +1,7 @@
 class LineBotController < ApplicationController
   require 'mechanize'
   require 'google/apis/youtube_v3'
-  require 'net/http'
+
 
   # callbackアクションでのみCSRF対策を無効化
   protect_from_forgery except: [:callback]
@@ -27,7 +27,7 @@ class LineBotController < ApplicationController
         # eventのtypeキーの値がLine::Bot::Event::MessageType::Text、つまりtextであるかどうか確認
         case event.type
         when Line::Bot::Event::MessageType::Text
-          if event.message['text'].include?('今日のツイッタートピック')
+          if event.message['text'].include?('今日のトピック')
             message = {
               type: 'text',
               text: '☆今話題になっているトピック☆' + "\n" + "\n" + tweet_topic.join
@@ -94,8 +94,8 @@ class LineBotController < ApplicationController
           client.reply_message(event['replyToken'],
                                { type: 'text',
                                  text: '【最寄駅と最寄路線までの距離です】' + "\n" + station_message + "\n" + "\n" + '最寄駅周辺のよりみちできるカフェスポットを調べる場合はメッセージ送信欄に【' + stations.map do |station|
-                                                                                                                                            "#{station['name']}"
-                                                                                                                                          end.first + '駅】のように調べたい駅名を入力してください。※駅まで含めて入力ください。' })
+                                                                                                                                                "#{station['name']}"
+                                                                                                                                              end.first + '駅】のように調べたい駅名を入力してください。※駅まで含めて入力ください。' })
         end
       end
     end
@@ -264,7 +264,6 @@ class LineBotController < ApplicationController
     res = Net::HTTP.get_response(uri)
     JSON.parse(res.body)['results']['shop']
   end
-
 
   def restaurants_bubble(shops)
     bubbles = []
