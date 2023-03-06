@@ -37,6 +37,10 @@ class LineBotController < ApplicationController
               type: 'flex',
               altText: 'Youtubeの検索結果です。',
               contents: youtube_topic
+            },
+            {
+              type: 'text',
+              text: 'Youtubeで今話題になっている動画の検索結果です！気になる動画はありましたか？'
             }
           elsif event.message['text'].include?('現在地検索')
             message = {
@@ -63,6 +67,10 @@ class LineBotController < ApplicationController
                 type: 'flex',
                 altText: 'よりみちできるカフェスポットの検索結果です！',
                 contents: restaurants_bubble(results)
+              },
+              {
+                type: 'text',
+                text: 'よりみちできるカフェスポットの検索結果です！気になるスポットは見つかりましたか？'
               }
               # reply_text = results.map{|result| "☆#{result['name']}"+ "\n" + "ジャンル：#{result['genre']['name']}" + "\n" + "住所：#{result['address']}"+ "\n" + "営業日時：#{result['open']}"+ "\n" + "休日：#{result['close']}"+ "\n" + "URL：#{result['urls']['pc']}"}.join("\n")
             else
