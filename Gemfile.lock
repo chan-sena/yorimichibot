@@ -327,7 +327,6 @@ DEPENDENCIES
   capybara (>= 3.26)
   dotenv-rails
   google-apis-youtube_v3
-  httpclient
   jbuilder (~> 2.7)
   line-bot-api
   listen (~> 3.3)
