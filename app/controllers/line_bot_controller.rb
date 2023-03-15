@@ -147,7 +147,7 @@ class LineBotController < ApplicationController
     response = youtube.list_videos('snippet', chart: 'mostPopular', max_results: 10, region_code: 'jp')
     youtube_texts = []
     response.items.each do |item|
-      @image = item.snippet.thumbnails.default.url
+      @image = item.snippet.thumbnails.high.url
       @url = item.id
       @title = item.snippet.title
       @description = item.snippet.description
@@ -281,7 +281,7 @@ class LineBotController < ApplicationController
           type: 'bubble',
           hero: {
             type: 'image',
-            url: shop['photo']['mobile']['l'],
+            url: shop['photo']['pc']['l'],
             size: 'full',
             aspectRatio: '20:13',
             aspectMode: 'cover',

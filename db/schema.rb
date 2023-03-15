@@ -10,16 +10,6 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_221_202_133_043) do
-  create_table 'line_bots', force: :cascade do |t|
-    t.datetime 'created_at', precision: 6, null: false
-    t.datetime 'updated_at', precision: 6, null: false
-  end
+ActiveRecord::Schema.define(version: 0) do
 
-  create_table 'messages', force: :cascade do |t|
-    t.string 'departure'
-    t.string 'destination'
-    t.datetime 'created_at', precision: 6, null: false
-    t.datetime 'updated_at', precision: 6, null: false
-  end
 end
