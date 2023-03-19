@@ -72,7 +72,6 @@ class LineBotController < ApplicationController
                 type: 'text',
                 text: 'よりみちできるカフェスポットの検索結果です！気になるスポットは見つかりましたか？'
               }
-              # reply_text = results.map{|result| "☆#{result['name']}"+ "\n" + "ジャンル：#{result['genre']['name']}" + "\n" + "住所：#{result['address']}"+ "\n" + "営業日時：#{result['open']}"+ "\n" + "休日：#{result['close']}"+ "\n" + "URL：#{result['urls']['pc']}"}.join("\n")
             else
               reply_text = "「#{text}」に該当するお店は見つかりませんでした。"
               message = {
@@ -80,10 +79,6 @@ class LineBotController < ApplicationController
                 text: reply_text
               }
             end
-            # message ={
-            #   type: 'text',
-            #   text: 'よりみちできるグルメスポットの検索結果です！' + "\n" + "\n" +  reply_text + "\n" + "\n" + 'Powered by ホットペッパー Webサービス'
-            # }
           else
             message = {
               type: 'text',
@@ -92,18 +87,37 @@ class LineBotController < ApplicationController
           end
           client.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Location
-          # p event['message']['latitude']
-          # p event['message']['longitude']
-          # p stations(event['message']['longitude'], event['message']['latitude'])
           stations = stations(event['message']['longitude'], event['message']['latitude'])
           station_message = stations.map do |station|
             "🚃#{station['name']}駅   #{station['line']}(#{station['distance']})"
           end.join("\n")
-          client.reply_message(event['replyToken'],
-                               { type: 'text',
-                                 text: '【最寄駅と最寄路線までの距離です】' + "\n" + station_message + "\n" + "\n" + '最寄駅周辺のよりみちできるカフェスポットを調べる場合はメッセージ送信欄に【' + stations.map do |station|
-                                                                                                                                                "#{station['name']}"
-                                                                                                                                              end.first + '駅】のように調べたい駅名を入力してください。※駅まで含めて入力ください。' })
+          station_name1 = stations.map do |station|
+            "#{station['name']}"
+          end.uniq[0]
+          station_name2 = stations.map do |station|
+            "#{station['name']}"
+          end.uniq[1]
+          reply_messages = {type: 'text',
+                            text: '【最寄駅と最寄路線までの距離です】' + "\n" + station_message},
+                           {type: 'template',
+                            altText: 'カフェスポット検索中',
+                            template: {
+                              type: 'buttons',
+                              text: '最寄駅周辺のカフェスポットを調べるにはこちらをタップ🔍',
+                              actions: [
+                                {
+                                  type: 'message',
+                                  label: station_name1 + '駅',
+                                  text: station_name1 + '駅'
+                                },
+                                {
+                                  type: 'message',
+                                  label: station_name2 + '駅',
+                                  text: station_name2 + '駅'
+                                }
+                              ]
+                            }}
+          client.reply_message(event['replyToken'], reply_messages)
         end
       end
     end
@@ -124,8 +138,6 @@ class LineBotController < ApplicationController
   end
 
   def tweet_topic
-    # 外部APIへGETリクエストするためのライブラリをインスタンス化、このhttp_clientでgetメソッドを使うと指定したURLに対してGETリクエストを行いそのレスポンスを取得できる
-    # http_client = HTTPClient.new
     # mechanizeのライブラリをインスタンス化してagent変数に代入
     tweet_texts = []
     agent = Mechanize.new
@@ -153,9 +165,6 @@ class LineBotController < ApplicationController
       @description = item.snippet.description
       @channel_title = item.snippet.channel_title
       youtube_texts.push youtube_topic_bubble
-      # youtube_texts <<
-      # youtube_texts
-      #  "☆"+ @title + "\n" + "\n" + "https://www.youtube.com/watch?v=" + @url + "\n" + "\n"
     end
     {
       type: 'carousel',
@@ -439,13 +448,4 @@ class LineBotController < ApplicationController
       contents: bubbles
     }
   end
-  # return results
-  # # getメソッドを使用しGETリクエストを送信
-  # response = http_client.get(page, elements)
-  # # GETリクエストに対するレスポンスをrespon
-  # response = JSON.parse(response.body)
-  # message = {
-  #   type: 'text',
-  #   text: elements
-  # }
 end
