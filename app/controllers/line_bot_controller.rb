@@ -267,7 +267,7 @@ class LineBotController < ApplicationController
   end
 
   def search_restaurants(keyword)
-    keyword_without_station = keyword.gsub('駅', '')
+    keyword_without_station = keyword.gsub(/駅/, '')
     uri = URI('http://webservice.recruit.co.jp/hotpepper/gourmet/v1/')
     uri.query = URI.encode_www_form({
                                       key: ENV['HOTPEPPER_API'],
