@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 技術スタック
 
-- Ruby 3.1.0 / Rails 6.1.4.1
+- Ruby 3.1.0 / Rails 7.0.0
 - LINE Messaging API（`line-bot-api` gem）
 - HotPepper グルメAPI（Net::HTTP で直接リクエスト）
 - HeartRails Express API（最寄駅検索、Net::HTTP）
@@ -51,9 +51,8 @@ LineBotController          # 署名検証・イベントルーティング
 - `handle_location_message_controller.rb:16-35`（位置情報）
 - カンマ区切りハッシュになっており2つ目のメッセージが届いていない。`[{...}, {...}]` の配列に修正する。
 
-**② 最寄駅が1件のときのnilクラッシュ**
-- `handle_location_message_controller.rb:9-14`
-- `stations.uniq[1]` が nil になり `nil + '駅'` で NoMethodError。駅件数チェックを追加する。
+**② 最寄駅が1件のときのnilクラッシュ** ✅ 修正済み
+- `station_names = stations.map { ... }.uniq.first(2)` で配列化し、`actions` を `station_names.map` で動的生成するよう変更。
 
 **③ Togetterスクレイピングのクラッシュ**
 - `handle_text_message_controller.rb:66-80`

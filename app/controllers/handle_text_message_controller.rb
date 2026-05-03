@@ -9,7 +9,7 @@ class HandleTextMessageController < LineBotController
               text: '☆今話題になっているトピック☆' + "\n" + "\n" + tweet_topic.join
             }
     when text.include?('急上昇動画')
-      message = {
+      message = [{
               type: 'flex',
               altText: 'Youtubeの検索結果です。',
               contents: youtube_topic
@@ -17,7 +17,7 @@ class HandleTextMessageController < LineBotController
             {
               type: 'text',
               text: 'Youtubeで今話題になっている動画の検索結果です！気になる動画はありましたか？'
-            }
+            }]
     when text.include?('現在地検索')
       message = {
               type: 'template',
@@ -38,7 +38,7 @@ class HandleTextMessageController < LineBotController
     when text.include?('駅')
       results = HandleLocationMessageController.new.search_restaurants(text)
       if results.present?
-              message = {
+              message = [{
                 type: 'flex',
                 altText: 'よりみちできるカフェスポットの検索結果です！',
                 contents: HandleLocationMessageController.new.restaurants_bubble(results)
@@ -46,7 +46,7 @@ class HandleTextMessageController < LineBotController
               {
                 type: 'text',
                 text: 'よりみちできるカフェスポットの検索結果です！気になるスポットは見つかりましたか？'
-              }
+              }]
       else
               reply_text = "「#{text}」に該当するお店は見つかりませんでした。"
               message = {

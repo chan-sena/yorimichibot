@@ -6,13 +6,9 @@ class HandleLocationMessageController < LineBotController
           station_message = stations.map do |station|
             "🚃#{station['name']}駅   #{station['line']}(#{station['distance']})"
           end.join("\n")
-          station_name1 = stations.map do |station|
+          station_names = stations.map do |station|
             "#{station['name']}"
-          end.uniq[0]
-          station_name2 = stations.map do |station|
-            "#{station['name']}"
-          end.uniq[1]
-
+          end.uniq.first(2)
           reply_messages = {type: 'text',
                             text: '【最寄駅と最寄路線までの距離です】' + "\n" + station_message},
                            {type: 'template',
@@ -20,18 +16,11 @@ class HandleLocationMessageController < LineBotController
                             template: {
                               type: 'buttons',
                               text: '最寄駅周辺のカフェスポットを調べるにはこちらをタップ🔍',
-                              actions: [
-                                {
-                                  type: 'message',
-                                  label: station_name1 + '駅',
-                                  text: station_name1 + '駅'
-                                },
-                                {
-                                  type: 'message',
-                                  label: station_name2 + '駅',
-                                  text: station_name2 + '駅'
-                                }
-                              ]
+                              actions: station_names.map do |name|
+                                {type: 'message',
+                                label: name + '駅',
+                                text: name + '駅'}
+                              end
                             }}
             reply_messages
   end
