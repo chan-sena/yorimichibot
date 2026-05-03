@@ -46,36 +46,37 @@ LineBotController          # 署名検証・イベントルーティング
 
 ### 優先度1：今すぐ直せるバグ
 
-**① 複数メッセージが送信されない構文バグ**
-- `handle_text_message_controller.rb:12-20`（急上昇動画）、`41-49`（駅検索）
-- `handle_location_message_controller.rb:16-35`（位置情報）
-- カンマ区切りハッシュになっており2つ目のメッセージが届いていない。`[{...}, {...}]` の配列に修正する。
+**① 複数メッセージが送信されない構文バグ** ✅ 修正済み
+- `handle_text_message_controller.rb`（急上昇動画・駅検索）を `[{...}, {...}]` の明示的な配列に修正。
+- `handle_location_message_controller.rb`（位置情報）はRubyの `a = x, y` 構文が自動で配列になるため実質問題なし。
 
 **② 最寄駅が1件のときのnilクラッシュ** ✅ 修正済み
 - `station_names = stations.map { ... }.uniq.first(2)` で配列化し、`actions` を `station_names.map` で動的生成するよう変更。
 
-**③ Togetterスクレイピングのクラッシュ**
+**② 最寄駅が0件のときに無応答** ✅ 修正済み
+- `handle_location_message_controller.rb` の先頭に `stations.blank?` のガード節を追加し、ユーザーにエラーメッセージを返すよう変更。
+
+**③ Togetterスクレイピングのクラッシュ** ❌ 未修正
 - `handle_text_message_controller.rb:66-80`
 - `text.at('h3')` や `text.at('a')` がnilを返したときにクラッシュ。エラーハンドリング追加またはRSSへの切り替えを検討。
 
 ### 優先度2：安定性向上
 
-**④ 外部APIのエラーハンドリング追加**
-- `handle_location_message_controller.rb:46-47`（HeartRails）、`62-63`（HotPepper）
+**④ 外部APIのエラーハンドリング追加** ❌ 未修正
+- `handle_location_message_controller.rb`（HeartRails・HotPepper）
 - APIエラー・タイムアウト時に begin/rescue でユーザーへエラーメッセージを返す。
 
-**⑤ HeartRails APIをHTTPS化**
-- `handle_location_message_controller.rb:40`
-- `http://` → `https://` に変更するだけ。位置情報を非暗号化通信で送っている。
+**⑤ HeartRails APIをHTTPS化** ✅ 修正済み
+- `handle_location_message_controller.rb` の `http://express.heartrails.com` を `https://` に変更済み。動作確認済み。
 
 ### 優先度3：バージョンアップ（中長期）
 
 **⑥ Ruby 3.1.0 → 3.3系**（2024年12月EOL済み）
 
-**⑦ Rails 6.1 → 7.1**（2023年EOL済み。6.1→7.0→7.1と段階的に更新）
+**⑦ Rails 7.0 → 7.1**（段階的に更新）
 
-**⑧ mechanize → RSS or Ferrum**
-- まずTogetterにランキングRSSがあるか確認。あればRSSで代替が最小コスト。なければFerumを検討。
+**⑧ mechanize → Ferrum**
+- TogetterにランキングRSSは存在しないことを確認済み。Ferrumへの切り替えを検討。
 
 ## デプロイ・運用
 
