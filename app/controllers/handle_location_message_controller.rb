@@ -3,6 +3,9 @@ class HandleLocationMessageController < LineBotController
 
   def handle_location_message(message)
     stations = stations(message['longitude'], message['latitude'])
+      if stations.blank?
+        return { type: 'text', text: '最寄駅がありません。'}
+      end
           station_message = stations.map do |station|
             "🚃#{station['name']}駅   #{station['line']}(#{station['distance']})"
           end.join("\n")
@@ -26,7 +29,7 @@ class HandleLocationMessageController < LineBotController
   end
 
   def stations(longitude, latitude)
-    uri = URI('http://express.heartrails.com/api/json')
+    uri = URI('https://express.heartrails.com/api/json')
     uri.query = URI.encode_www_form({
                                       method: 'getStations',
                                       x: longitude,
