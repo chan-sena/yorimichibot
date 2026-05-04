@@ -1,5 +1,5 @@
 class LineBotController < ApplicationController
-  require 'mechanize'
+  require 'ferrum'
   require 'google/apis/youtube_v3'
   require_relative 'handle_text_message_controller'
   require_relative 'handle_location_message_controller'

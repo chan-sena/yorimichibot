@@ -64,19 +64,33 @@ class HandleTextMessageController < LineBotController
   end
 
   def tweet_topic
-    # mechanizeのライブラリをインスタンス化してagent変数に代入
+    # 結果を貯める空配列
     tweet_texts = []
-    agent = Mechanize.new
-    # agent変数にURLに対してgetリクエストを行い、その結果をpage変数に代入
-    page = agent.get('https://togetter.com/ranking')
-    page.search('li div.inner').first(10).each_with_index do |text, index|
+    # headless Chromeを起動。headless:trueは画面を表示せずにバックグラウンドで動かすオプション。agent変数にFerrum::Browser.newを代入
+    browser = Ferrum::Browser.new(headless: true)
+    # 起動したChromeでtogetterのランキングページを開く
+    browser.goto('https://togetter.com/ranking')
+    # Chromeが取得したページのHTMLを文字列で受け取り、Nokogiriに渡して解析できる状態にする。
+    doc = Nokogiri::HTML(browser.body)
+    # chromeを終了。プロセスを明示的に閉じる
+    browser.quit
+    doc.search('li div.inner').first(10).each_with_index do |text, index|
+    # h3かaがnil、またはhref属性がない場合はそのアイテムをスキップ
+    next unless text.at('h3') && text.at('a') && text.at('a')[:href]
       title = text.at('h3').inner_text
       url = text.at('a')[:href]
       tweet_texts <<
         "【#{index + 1}】" + title + "\n" +
         'https://togetter.com/' + url + "\n" + "\n"
     end
+    # 1件も取得できなかった場合
+    if tweet_texts.empty?
+      return ['トピックを取得できませんでした。']
+    end
     tweet_texts
+  # Chromeの起動失敗やネットワークエラーなど予期しない例外が起きた時の処理
+  rescue Ferrum::Error, StandardError
+    ['トピックを取得できませんでした。']
   end
 
 
