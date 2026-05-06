@@ -58,7 +58,6 @@ gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 gem 'dotenv-rails'
 gem 'google-apis-youtube_v3'
 gem 'line-bot-api'
-gem 'ferrum'
 gem 'nokogiri'
 gem 'rubocop'
 gem 'net-imap'

@@ -64,16 +64,17 @@ class HandleTextMessageController < LineBotController
   end
 
   def tweet_topic
+    # togetterのURLをURIオブジェクトに変換する。このあと.hostや.portで分解して使用するため
+    uri = URI('https://togetter.com/ranking')
+    # uri.host(togetter.com)とuri.port(443)を渡し、HTTPS通信とタイムアウト設定をする
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 5, read_timeout: 10) do |http|
+      # getリクエストを送る。{'User-Agent' => 'Mozilla/5.0'}はリクエストヘッダーで、bot判定を避ける
+      http.get(uri.request_uri, {'User-Agent' => 'Mozilla/5.0'})
+    end
+    # レスポンスのHTML文字列をNokogiriに渡して解析する
+    doc = Nokogiri::HTML(res.body)
     # 結果を貯める空配列
     tweet_texts = []
-    # headless Chromeを起動。headless:trueは画面を表示せずにバックグラウンドで動かすオプション。agent変数にFerrum::Browser.newを代入
-    browser = Ferrum::Browser.new(headless: true)
-    # 起動したChromeでtogetterのランキングページを開く
-    browser.goto('https://togetter.com/ranking')
-    # Chromeが取得したページのHTMLを文字列で受け取り、Nokogiriに渡して解析できる状態にする。
-    doc = Nokogiri::HTML(browser.body)
-    # chromeを終了。プロセスを明示的に閉じる
-    browser.quit
     doc.search('li div.inner').first(10).each_with_index do |text, index|
     # h3かaがnil、またはhref属性がない場合はそのアイテムをスキップ
     next unless text.at('h3') && text.at('a') && text.at('a')[:href]
@@ -81,7 +82,7 @@ class HandleTextMessageController < LineBotController
       url = text.at('a')[:href]
       tweet_texts <<
         "【#{index + 1}】" + title + "\n" +
-        'https://togetter.com/' + url + "\n" + "\n"
+        'https://togetter.com' + url + "\n" + "\n"
     end
     # 1件も取得できなかった場合
     if tweet_texts.empty?
@@ -89,7 +90,9 @@ class HandleTextMessageController < LineBotController
     end
     tweet_texts
   # Chromeの起動失敗やネットワークエラーなど予期しない例外が起きた時の処理
-  rescue Ferrum::Error, StandardError
+  rescue Net::OpenTimeout, Net::ReadTimeout
+    ['トピックを取得できませんでした。']
+  rescue StandardError
     ['トピックを取得できませんでした。']
   end
 

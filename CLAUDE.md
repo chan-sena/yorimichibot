@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - HotPepper グルメAPI（Net::HTTP で直接リクエスト）
 - HeartRails Express API（最寄駅検索、Net::HTTP）
 - YouTube Data API v3（`google-apis-youtube_v3` gem）
-- Togetter スクレイピング（`ferrum` gem + Nokogiri）
+- Togetter スクレイピング（Net::HTTP + Nokogiri）
 
 ## よく使うコマンド
 
@@ -57,17 +57,20 @@ LineBotController          # 署名検証・イベントルーティング
 - `handle_location_message_controller.rb` の先頭に `stations.blank?` のガード節を追加し、ユーザーにエラーメッセージを返すよう変更。
 
 **③ Togetterスクレイピングのクラッシュ** ✅ 修正済み
-- `mechanize` → `ferrum` + Nokogiri に切り替え（mechanizeは実質開発終了のため）。
+- `mechanize` → Net::HTTP + Nokogiri に切り替え（mechanizeは実質開発終了のため。FerumはJS不要なSSRページには不要と判断）。
 - `text.at('h3')` や `text.at('a')` がnilのときは `next unless` でスキップするよう修正。
-- メソッド全体を `rescue Ferrum::Error, StandardError` で囲み、失敗時はエラーメッセージを返す。
-- `line_bot_controller.rb` の `require 'mechanize'` を `require 'ferrum'` に変更済み。
+- `rescue Net::OpenTimeout, Net::ReadTimeout, StandardError` で例外を捕捉し、エラーメッセージを返す。
+- `User-Agent` ヘッダーを付与してボット判定を回避。
+- レスポンスタイムがFerrum比で約20〜40倍改善（5000〜10000ms → 277ms）。
 - ローカルでの動作確認済み。Renderへのデプロイ・本番確認は未実施。
 
 ### 優先度2：安定性向上
 
-**④ 外部APIのエラーハンドリング追加** ❌ 未修正
+**④ 外部APIのエラーハンドリング追加** ✅ 修正済み
 - `handle_location_message_controller.rb`（HeartRails・HotPepper）
-- APIエラー・タイムアウト時に begin/rescue でユーザーへエラーメッセージを返す。
+- `Net::HTTP.get_response` → `Net::HTTP.start(open_timeout: 5, read_timeout: 10)` に変更し、タイムアウトを60秒→10秒に短縮。
+- `['response']['station']` → `.dig('response', 'station')` に変更し、想定外JSONでもクラッシュしないよう修正。
+- `rescue Net::OpenTimeout, Net::ReadTimeout, StandardError` で例外を捕捉し `nil` を返す。呼び出し元の `stations.blank?` がnilを拾ってユーザーにエラーメッセージを返す。
 
 **⑤ HeartRails APIをHTTPS化** ✅ 修正済み
 - `handle_location_message_controller.rb` の `http://express.heartrails.com` を `https://` に変更済み。動作確認済み。
@@ -78,7 +81,7 @@ LineBotController          # 署名検証・イベントルーティング
 
 **⑦ Rails 7.0 → 7.1**（段階的に更新）
 
-**⑧ mechanize → Ferrum** ✅ 対応済み（改善計画③に統合）
+**⑧ mechanize → Net::HTTP + Nokogiri** ✅ 対応済み（改善計画③に統合）
 
 ## デプロイ・運用
 

@@ -4,7 +4,7 @@ class HandleLocationMessageController < LineBotController
   def handle_location_message(message)
     stations = stations(message['longitude'], message['latitude'])
       if stations.blank?
-        return { type: 'text', text: '最寄駅がありません。'}
+        return { type: 'text', text: '最寄駅の情報を取得できませんでした。時間をおいて再度お試しください。'}
       end
           station_message = stations.map do |station|
             "🚃#{station['name']}駅   #{station['line']}(#{station['distance']})"
@@ -35,8 +35,17 @@ class HandleLocationMessageController < LineBotController
                                       x: longitude,
                                       y: latitude
                                     })
-    res = Net::HTTP.get_response(uri)
-    JSON.parse(res.body)['response']['station']
+    # デフォルト60秒のタイムアウトを短縮。接続に5秒、レスポンス待ちに10秒以上かかったら即座にあきらめてユーザーにエラーを返す。timeoutはruby標準ライブラリに存在する定義
+    res = Net::HTTP.start(uri.host, uri.port,use_ssl: true,open_timeout: 5, read_timeout: 10) do |http|
+      # request_uriはURIモジュールに標準搭載されている定義
+      http.get(uri.request_uri)
+    end
+    # APIが想定外のJSONを返しても、digを入れることでクラッシュせずにnilを返す
+    JSON.parse(res.body).dig('response','station')
+  rescue Net::OpenTimeout, Net::ReadTimeout
+    nil
+  rescue StandardError
+    nil
   end
 
   def search_restaurants(keyword)
@@ -51,8 +60,15 @@ class HandleLocationMessageController < LineBotController
                                       order: 4,
                                       format: 'json'
                                     })
-    res = Net::HTTP.get_response(uri)
-    JSON.parse(res.body)['results']['shop']
+    # uriを分解して取り出している、use_sslをfalseにするとHTTPSではなくHTTPになる
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 5, read_timeout: 10) do |http|
+      http.get(uri.request_uri)
+    end
+    JSON.parse(res.body).dig('results','shop')
+  rescue Net::OpenTimeout, Net::ReadTimeout
+    nil
+  rescue StandardError
+    nil
   end
 
   def restaurants_bubble(shops)
