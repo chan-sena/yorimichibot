@@ -1,0 +1,18 @@
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+/Users/sena/.rbenv/versions/3.3.11/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-u6dzhj sitelibdir\=./.gem.20260507-44024-u6dzhj clean
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-u6dzhj sitelibdir\=./.gem.20260507-44024-u6dzhj
+compiling cparse.c
+linking shared-object racc/cparse.bundle
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-u6dzhj sitelibdir\=./.gem.20260507-44024-u6dzhj install
+/usr/local/bin/ginstall -c -m 0755 cparse.bundle ./.gem.20260507-44024-u6dzhj/racc
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-u6dzhj sitelibdir\=./.gem.20260507-44024-u6dzhj clean

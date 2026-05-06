@@ -1,0 +1,18 @@
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/cgi-0.5.1/ext/cgi/escape
+/Users/sena/.rbenv/versions/3.3.11/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/cgi-0.5.1/ext/cgi/escape
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-kq9kiq sitelibdir\=./.gem.20260507-48830-kq9kiq clean
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/cgi-0.5.1/ext/cgi/escape
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-kq9kiq sitelibdir\=./.gem.20260507-48830-kq9kiq
+compiling escape.c
+linking shared-object cgi/escape.bundle
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/cgi-0.5.1/ext/cgi/escape
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-kq9kiq sitelibdir\=./.gem.20260507-48830-kq9kiq install
+/usr/local/bin/ginstall -c -m 0755 escape.bundle ./.gem.20260507-48830-kq9kiq/cgi
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/cgi-0.5.1/ext/cgi/escape
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-kq9kiq sitelibdir\=./.gem.20260507-48830-kq9kiq clean

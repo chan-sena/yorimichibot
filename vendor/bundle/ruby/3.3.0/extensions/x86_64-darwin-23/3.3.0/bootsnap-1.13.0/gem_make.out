@@ -1,0 +1,18 @@
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.13.0/ext/bootsnap
+/Users/sena/.rbenv/versions/3.3.11/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.13.0/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-lyt55c sitelibdir\=./.gem.20260507-44024-lyt55c clean
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.13.0/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-lyt55c sitelibdir\=./.gem.20260507-44024-lyt55c
+compiling bootsnap.c
+linking shared-object bootsnap/bootsnap.bundle
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.13.0/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-lyt55c sitelibdir\=./.gem.20260507-44024-lyt55c install
+/usr/local/bin/ginstall -c -m 0755 bootsnap.bundle ./.gem.20260507-44024-lyt55c/bootsnap
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.13.0/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-lyt55c sitelibdir\=./.gem.20260507-44024-lyt55c clean

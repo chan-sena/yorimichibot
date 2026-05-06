@@ -1,0 +1,18 @@
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bindex-0.8.1/ext/skiptrace
+/Users/sena/.rbenv/versions/3.3.11/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bindex-0.8.1/ext/skiptrace
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-l6d4oi sitelibdir\=./.gem.20260507-44024-l6d4oi clean
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bindex-0.8.1/ext/skiptrace
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-l6d4oi sitelibdir\=./.gem.20260507-44024-l6d4oi
+compiling cruby.c
+linking shared-object skiptrace/internal/cruby.bundle
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bindex-0.8.1/ext/skiptrace
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-l6d4oi sitelibdir\=./.gem.20260507-44024-l6d4oi install
+/usr/local/bin/ginstall -c -m 0755 cruby.bundle ./.gem.20260507-44024-l6d4oi/skiptrace/internal
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/bindex-0.8.1/ext/skiptrace
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-l6d4oi sitelibdir\=./.gem.20260507-44024-l6d4oi clean

@@ -1,0 +1,27 @@
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/rbs-2.8.1/ext/rbs_extension
+/Users/sena/.rbenv/versions/3.3.11/bin/ruby extconf.rb
+checking for whether -std=c99 is accepted as CFLAGS... yes
+creating Makefile
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/rbs-2.8.1/ext/rbs_extension
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-hjqk5w sitelibdir\=./.gem.20260507-44024-hjqk5w clean
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/rbs-2.8.1/ext/rbs_extension
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-hjqk5w sitelibdir\=./.gem.20260507-44024-hjqk5w
+compiling constants.c
+compiling lexer.c
+compiling lexstate.c
+compiling location.c
+compiling main.c
+compiling parser.c
+compiling parserstate.c
+compiling ruby_objs.c
+compiling unescape.c
+linking shared-object rbs_extension.bundle
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/rbs-2.8.1/ext/rbs_extension
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-hjqk5w sitelibdir\=./.gem.20260507-44024-hjqk5w install
+/usr/local/bin/ginstall -c -m 0755 rbs_extension.bundle ./.gem.20260507-44024-hjqk5w
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/rbs-2.8.1/ext/rbs_extension
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-hjqk5w sitelibdir\=./.gem.20260507-44024-hjqk5w clean

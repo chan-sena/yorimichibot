@@ -1,0 +1,24 @@
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/date-3.5.1/ext/date
+/Users/sena/.rbenv/versions/3.3.11/bin/ruby extconf.rb
+checking for rb_category_warn()... yes
+checking for timezone in time.h with  -Werror... yes
+checking for altzone in time.h with  -Werror... no
+creating Makefile
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/date-3.5.1/ext/date
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-v5jxkp sitelibdir\=./.gem.20260507-48830-v5jxkp clean
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/date-3.5.1/ext/date
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-v5jxkp sitelibdir\=./.gem.20260507-48830-v5jxkp
+compiling date_core.c
+compiling date_parse.c
+compiling date_strftime.c
+compiling date_strptime.c
+linking shared-object date_core.bundle
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/date-3.5.1/ext/date
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-v5jxkp sitelibdir\=./.gem.20260507-48830-v5jxkp install
+/usr/local/bin/ginstall -c -m 0755 date_core.bundle ./.gem.20260507-48830-v5jxkp
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/date-3.5.1/ext/date
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-v5jxkp sitelibdir\=./.gem.20260507-48830-v5jxkp clean

@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 技術スタック
 
-- Ruby 3.1.0 / Rails 7.0.0
+- Ruby 3.3.11 / Rails 7.1.6
 - LINE Messaging API（`line-bot-api` gem）
 - HotPepper グルメAPI（Net::HTTP で直接リクエスト）
 - HeartRails Express API（最寄駅検索、Net::HTTP）
@@ -77,9 +77,9 @@ LineBotController          # 署名検証・イベントルーティング
 
 ### 優先度3：バージョンアップ（中長期）
 
-**⑥ Ruby 3.1.0 → 3.3系**（2024年12月EOL済み）
+**⑥ Ruby 3.1.0 → 3.3.11** ✅ 対応済み
 
-**⑦ Rails 7.0 → 7.1**（段階的に更新）
+**⑦ Rails 7.0 → 7.1.6** ✅ 対応済み
 
 **⑧ mechanize → Net::HTTP + Nokogiri** ✅ 対応済み（改善計画③に統合）
 

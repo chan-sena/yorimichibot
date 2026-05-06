@@ -1,0 +1,28 @@
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/haml-6.1.1/ext/haml
+/Users/sena/.rbenv/versions/3.3.11/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/haml-6.1.1/ext/haml
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-unuvj9 sitelibdir\=./.gem.20260507-44024-unuvj9 clean
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/haml-6.1.1/ext/haml
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-unuvj9 sitelibdir\=./.gem.20260507-44024-unuvj9
+compiling haml.c
+In file included from haml.c:2:
+In file included from /Users/sena/.rbenv/versions/3.3.11/include/ruby-3.3.0/ruby/encoding.h:22:
+/Users/sena/.rbenv/versions/3.3.11/include/ruby-3.3.0/ruby/internal/encoding/ctype.h:82:46: warning: unused parameter 'enc' [-Wunused-parameter]
+   82 | rb_enc_isascii(OnigCodePoint c, rb_encoding *enc)
+      |                                              ^
+haml.c:61:10: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'unsigned int' [-Wshorten-64-to-32]
+   61 |   size = hesc_escape_html(&buf, RSTRING_PTR(str), RSTRING_LEN(str));
+      |        ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2 warnings generated.
+compiling hescape.c
+linking shared-object haml/haml.bundle
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/haml-6.1.1/ext/haml
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-unuvj9 sitelibdir\=./.gem.20260507-44024-unuvj9 install
+/usr/local/bin/ginstall -c -m 0755 haml.bundle ./.gem.20260507-44024-unuvj9/haml
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/haml-6.1.1/ext/haml
+make DESTDIR\= sitearchdir\=./.gem.20260507-44024-unuvj9 sitelibdir\=./.gem.20260507-44024-unuvj9 clean

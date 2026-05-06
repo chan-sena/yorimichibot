@@ -1,0 +1,19 @@
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/erb-6.0.4/ext/erb/escape
+/Users/sena/.rbenv/versions/3.3.11/bin/ruby extconf.rb
+checking for rb_ext_ractor_safe() in ruby.h... yes
+creating Makefile
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/erb-6.0.4/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-9qihxi sitelibdir\=./.gem.20260507-48830-9qihxi clean
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/erb-6.0.4/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-9qihxi sitelibdir\=./.gem.20260507-48830-9qihxi
+compiling escape.c
+linking shared-object erb/escape.bundle
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/erb-6.0.4/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-9qihxi sitelibdir\=./.gem.20260507-48830-9qihxi install
+/usr/local/bin/ginstall -c -m 0755 escape.bundle ./.gem.20260507-48830-9qihxi/erb
+
+current directory: /Users/sena/runteq/pf/yorimichibot/vendor/bundle/ruby/3.3.0/gems/erb-6.0.4/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20260507-48830-9qihxi sitelibdir\=./.gem.20260507-48830-9qihxi clean
