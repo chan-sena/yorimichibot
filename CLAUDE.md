@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Claudeへの行動指針
+
+- ファイルの新規作成・既存ファイルの変更を問わず、実行前に「何を・どう変えるか・なぜ必要か」をすべて説明してから実行すること。説明を省略しない。
+
 ## サービス概要
 
 「ふらりトピック」 — LINEボット。位置情報から最寄駅・近隣カフェを検索し、話題のニュースやYouTube急上昇動画を案内する。データベース不使用（ActiveRecordは未利用）。
@@ -106,14 +110,36 @@ LineBotController          # 署名検証・イベントルーティング
 
 ## 今後の開発計画
 
-### Docker移行（優先度：中）
+### Docker移行（優先度：中）✅ Step 1 完了
 
 - docker-compose構成：`web`（Rails）+ `db`（PostgreSQL）の2サービス
 - DBなしの現状でも、将来を見越してPostgreSQL込みの構成で最初から組む
 - **移行順序**：
-  1. Docker移行（DB接続設定は入れるが機能実装はまだしない）
-  2. Ruby 3.3系 + Rails 7.1へのバージョンアップを同時に実施（改善計画⑥⑦）
-  3. 検索履歴機能を実装
+  1. ~~Docker移行（DB接続設定は入れるが機能実装はまだしない）~~ ✅ 完了
+  2. ~~Ruby 3.3系 + Rails 7.1へのバージョンアップを同時に実施（改善計画⑥⑦）~~ ✅ 先行して対応済み
+  3. RSpec追加（Docker環境でテストが動くよう設定する）
+  4. 検索履歴機能を実装
+  5. 検索履歴機能のテスト追加
+
+**作成・変更したファイル：**
+- `Dockerfile` — `ruby:3.3.11-slim` ベース。bundle install に必要なシステムライブラリを追加
+- `docker-compose.yml` — `web`（Rails）+ `db`（PostgreSQL 16-alpine）、`bundle_cache` ボリュームでgemキャッシュ
+- `.dockerignore` — `.git`、`log/`、`tmp/`、`storage/`、`.env` を除外
+- `config/database.yml` — PostgreSQL + `DATABASE_URL` 環境変数で接続する設定に変更
+
+**`slim` イメージで必要だったシステムライブラリ（ハマりポイント）：**
+- `libpq-dev` — `pg` gem（PostgreSQLクライアント）
+- `libxml2-dev` / `libxslt1-dev` / `pkg-config` — `nokogiri`（C拡張）
+- `libyaml-dev` — `psych 5.3.1`（`dotenv-rails` → `railties` → `irb` → `rdoc` 経由で依存）
+- `build-essential` / `nodejs` / `curl` — 基本ビルドツール
+
+**docker compose up --build でのローカル動作確認済み（2026-05-17）**
+
+### RSpec追加（優先度：中、Docker移行後）
+
+- Docker移行後にRSpec環境をセットアップする
+- 既存機能（スクレイピング・API呼び出し）のテストから着手
+- DB追加後は検索履歴機能のテストも追加
 
 ### 検索履歴機能（優先度：低、Docker移行後）
 
