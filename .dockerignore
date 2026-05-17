@@ -1,5 +1,7 @@
 .git
 .gitignore
+.bundle
+vendor/bundle
 node_modules
 log/*
 tmp/*
